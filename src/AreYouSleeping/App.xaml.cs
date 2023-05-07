@@ -61,13 +61,14 @@ public partial class App : Application
         services.Configure<AppSettings>(Configuration?.GetSection(nameof(AppSettings)));
         services.AddLogging(loggingBuilder =>
         {
-                // configure Logging with NLog
+            // configure Logging with NLog
             loggingBuilder.ClearProviders();
             loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
             loggingBuilder.AddNLog();
         });
 
         services.AddTransient(typeof(MainWindow));
+        services.AddSingleton<BrowserAutomation>();
     }
 
     private void Icon_DoubleClick(object? sender, EventArgs e)
