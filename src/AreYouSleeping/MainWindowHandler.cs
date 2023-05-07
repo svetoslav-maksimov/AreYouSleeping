@@ -1,21 +1,22 @@
-﻿namespace AreYouSleeping
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace AreYouSleeping;
+
+public static class MainWindowHandler
 {
-    public static class MainWindowHandler
+    public static MainWindow? Instance { get; set; } = null;
+
+
+    public static void ShowOrFocus()
     {
-        public static MainWindow? Instance { get; set; } = null;
-
-
-        public static void ShowOrFocus()
+        if (Instance == null)
         {
-            if (Instance == null)
-            {
-                var mainWindow = new MainWindow();
-                mainWindow.Show();
-            }
-            else
-            {
-                Instance.Focus();
-            }
+            var mainWindow = ((App)App.Current).ServiceProvider?.GetRequiredService<MainWindow>();
+            mainWindow?.Show();
+        }
+        else
+        {
+            Instance.Focus();
         }
     }
 }
