@@ -5,8 +5,129 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AreYouSleeping"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Are You Sleeping" Height="400" Width="600">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid Margin="25">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel>
+            <Grid Margin="15 25">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Sleep Timer" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Margin="12 4" x:Name="sleepTimeCombo" ItemsSource="{Binding TimerOptions}"
+                          SelectedItem="{Binding SelectedTimerOption, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Label}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="StartTimer" Content="Start" Command="{Binding StartTimerCommand}" 
+                        Margin="8" Height="48"/>
+
+                <Button Grid.Column="1" x:Name="Stop" Content="Stop" Command="{Binding StopTimerCommand}"
+                        Margin="8" Height="48"/>
+
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+        </StackPanel>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid Margin="15 25 15 2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Margin="12 4" ItemsSource="{Binding ActionModes}"
+                          SelectedItem="{Binding SelectedActionMode, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Label}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+
+                <StackPanel Visibility="{Binding BrowserOptionsVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Margin="12 0">
+                    <TextBlock Text="NOTE: Close browser tab mode currently only supports the Chrome browser" 
+                           TextWrapping="Wrap" Margin="0 6" Foreground="#FFBD440A"/>
+
+                    <CheckBox Content="Netflix" IsChecked="{Binding BrowserOptionsNetflix, Mode=TwoWay}" />
+                    <CheckBox Content="HBO Max" IsChecked="{Binding BrowserOptionsHbo, Mode=TwoWay}" />
+                    <CheckBox Content="Prime Video" IsChecked="{Binding BrowserOptionsPrime, Mode=TwoWay}" />
+                    <CheckBox Content="Custom" IsChecked="{Binding BrowserOptionsCustom, Mode=TwoWay}" />
+
+                    <StackPanel Visibility="{Binding BrowserOptionsCustom, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ItemsControl ItemsSource="{Binding CustomBrowserPatterns}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding ., Mode=TwoWay}" Margin="22 2 2 2"/>
+                                        <Button Width="24" Content="x" Grid.Column="1" Margin="2" 
+                                            Command="{Binding DataContext.DeleteCustomBrowserPatternCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                                            CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Grid Margin="0 6 0 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding CustomBrowserNewPattern, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="22 2 2 2"/>
+                            <Button Width="24" Content="+" Grid.Column="1" Margin="2" />
+                        </Grid>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+
+                <Button Content="Apply" Command="{Binding ApplySettingsCommand}" 
+                        Margin="8" Height="32"/>
+
+                <Button Grid.Column="1" Content="Cancel" Command="{Binding CancelSettingsCommand}"
+                        Margin="8" Height="32"/>
+            </Grid>
+        </Grid>
 
     </Grid>
 </Window>

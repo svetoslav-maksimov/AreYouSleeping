@@ -9,12 +9,15 @@ namespace AreYouSleeping;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private MainWindowViewModel _viewModel;
 
     public MainWindow(ILogger<MainWindow> logger)
     {
-        logger.LogWarning("DI is working, and NLog is working :)");
-
         MainWindowHandler.Instance = this;
+
+        _viewModel = new MainWindowViewModel();
+        DataContext = _viewModel;
+
         InitializeComponent();
     }
 
