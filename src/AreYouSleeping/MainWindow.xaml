@@ -54,7 +54,6 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid Margin="15 25 15 2">
                 <Grid.ColumnDefinitions>
@@ -113,20 +112,7 @@
 
                 </StackPanel>
             </ScrollViewer>
-
-            <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-
-                <Button Content="Apply" Command="{Binding ApplySettingsCommand}" 
-                        Margin="8" Height="32"/>
-
-                <Button Grid.Column="1" Content="Cancel" Command="{Binding CancelSettingsCommand}"
-                        Margin="8" Height="32"/>
-            </Grid>
+            
         </Grid>
 
     </Grid>

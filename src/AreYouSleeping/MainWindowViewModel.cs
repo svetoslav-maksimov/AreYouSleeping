@@ -1,9 +1,17 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using Microsoft.Extensions.Options;
+using System.Windows.Threading;
+using System.Threading.Tasks;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 namespace AreYouSleeping;
 
@@ -15,7 +23,6 @@ public partial class MainWindowViewModel : ObservableObject
     public ObservableCollection<ActionModeOption> ActionModes { get; set; }
 
     public ObservableCollection<string> CustomBrowserPatterns { get; set; }
-
 
     [ObservableProperty]
     private TimerOption _selectedTimerOption;
@@ -44,11 +51,13 @@ public partial class MainWindowViewModel : ObservableObject
     public RelayCommand StartTimerCommand { get; init; }
     public RelayCommand StopTimerCommand { get; init; }
     public RelayCommand<string> DeleteCustomBrowserPatternCommand { get; init; }
-    public RelayCommand ApplySettingsCommand { get; set; }
-    public RelayCommand CancelSettingsCommand { get; set; }
 
-    public MainWindowViewModel()
+    private readonly AppSettings _appSettings;
+    private readonly DebounceDispatcher _debounceTimer = new DebounceDispatcher();
+
+    public MainWindowViewModel(IOptions<AppSettings> options)
     {
+        _appSettings = options.Value;
 
         TimerOptions = new ObservableCollection<TimerOption>
         {
@@ -66,18 +75,92 @@ public partial class MainWindowViewModel : ObservableObject
             TimerOption.FromDuration(TimeSpan.FromMinutes(240))
         };
 
-        SelectedTimerOption = TimerOptions.First(t => t.Duration.TotalMinutes == 20);
 
         ActionModes = new ObservableCollection<ActionModeOption>(Enum.GetValues<ActionMode>().Select(x => ActionModeOption.FromMode(x)));
-        _selectedActionMode = ActionModes.First(x => x.ActionMode == ActionMode.CloseBrowserTab);
 
         CustomBrowserPatterns = new ObservableCollection<string>();
 
         StartTimerCommand = new RelayCommand(StartTimerExecute, () => { return !_isTimerRunning; });
         StopTimerCommand = new RelayCommand(StopTimerExecute, () => { return _isTimerRunning; });
         DeleteCustomBrowserPatternCommand = new RelayCommand<string>(DeleteCustomBrowserPattern);
-        ApplySettingsCommand = new RelayCommand(ApplySettings);
-        CancelSettingsCommand = new RelayCommand(CancelSettings);
+
+        _selectedActionMode = ActionModes.First(x => x.ActionMode == ActionMode.CloseBrowserTab);
+        _selectedTimerOption = TimerOptions.First(t => t.Duration.TotalMinutes == 20);
+
+        LoadFromSettings();
+    }
+
+    private void LoadFromSettings()
+    {
+        SelectedActionMode =
+            ActionModes.FirstOrDefault(x => x.ActionMode == _appSettings.SelectedActionMode)
+            ?? ActionModes.First(x => x.ActionMode == ActionMode.CloseBrowserTab);
+
+        SelectedTimerOption = TimerOptions.FirstOrDefault(x => x.Duration == _appSettings.TimerDuration)
+            ?? TimerOptions.OrderBy(t => Math.Abs(t.Duration.TotalMilliseconds - _appSettings.TimerDuration.TotalMilliseconds)).First();
+
+        BrowserOptionsNetflix = _appSettings.BrowserTabOptions.Netflix;
+        BrowserOptionsHbo = _appSettings.BrowserTabOptions.Hbo;
+        BrowserOptionsPrime = _appSettings.BrowserTabOptions.Prime;
+        BrowserOptionsCustom = _appSettings.BrowserTabOptions.Custom;
+
+        CustomBrowserPatterns = new ObservableCollection<string>(_appSettings.BrowserTabOptions.CustomBrowserPatterns);
+    }
+
+    private async Task SaveToSettings()
+    {
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
+
+        var inputJson = await File.ReadAllTextAsync(path);
+        var jNode = JsonNode.Parse(inputJson)!;
+        var settings = jNode!["AppSettings"]!.Deserialize<AppSettings>()!;
+
+        settings.SelectedActionMode = SelectedActionMode.ActionMode;
+        settings.TimerDuration = SelectedTimerOption.Duration;
+        settings.BrowserTabOptions.Netflix = BrowserOptionsNetflix;
+        settings.BrowserTabOptions.Hbo = BrowserOptionsHbo;
+        settings.BrowserTabOptions.Prime = BrowserOptionsPrime;
+        settings.BrowserTabOptions.Custom = BrowserOptionsCustom;
+        settings.BrowserTabOptions.CustomBrowserPatterns = CustomBrowserPatterns.ToList();
+
+        var serializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic)
+        };
+
+        var updatedJsonString = JsonSerializer.Serialize(settings, serializerOptions);
+        jNode["AppSettings"] = JsonNode.Parse(updatedJsonString);
+
+        var outputJson = jNode.ToJsonString(serializerOptions);
+
+        if (inputJson != outputJson)
+        {
+            await File.WriteAllTextAsync(path, outputJson);
+        }
+    }
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        string[] persistedPropertyNames = new string[]
+        {
+            nameof(SelectedActionMode),
+            nameof(SelectedTimerOption),
+            nameof(BrowserOptionsNetflix),
+            nameof(BrowserOptionsPrime),
+            nameof(BrowserOptionsCustom),
+            nameof(CustomBrowserPatterns),
+        };
+
+        if (persistedPropertyNames.Contains(e.PropertyName))
+        {
+            _debounceTimer.Debounce(100, async (p) =>
+            {
+                await SaveToSettings();
+            });
+        }
     }
 
     private void StartTimerExecute()
@@ -102,15 +185,6 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void ApplySettings()
-    {
-        // TODO
-    }
-
-    private void CancelSettings()
-    {
-        // TODO
-    }
 
     partial void OnSelectedActionModeChanged(ActionModeOption value)
     {

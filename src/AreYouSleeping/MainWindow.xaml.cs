@@ -9,14 +9,11 @@ namespace AreYouSleeping;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private MainWindowViewModel _viewModel;
-
-    public MainWindow(ILogger<MainWindow> logger)
+    public MainWindow(ILogger<MainWindow> logger, MainWindowViewModel mainWindowViewModel)
     {
         MainWindowHandler.Instance = this;
 
-        _viewModel = new MainWindowViewModel();
-        DataContext = _viewModel;
+        DataContext = mainWindowViewModel;
 
         InitializeComponent();
     }

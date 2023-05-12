@@ -67,7 +67,8 @@ public partial class App : Application
             loggingBuilder.AddNLog();
         });
 
-        services.AddTransient(typeof(MainWindow));
+        services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<MainWindow>();        
         services.AddSingleton<BrowserAutomation>();
     }
 
