@@ -44,6 +44,8 @@
                         Margin="8" Height="48"/>
 
             </Grid>
+
+            <TextBlock Text="{Binding ElapsedTime,StringFormat=hh\\:mm\\:ss}" HorizontalAlignment="Center" Margin="0 16" FontSize="32"/>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

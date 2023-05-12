@@ -67,9 +67,9 @@ public partial class App : Application
             loggingBuilder.AddNLog();
         });
 
-        services.AddTransient<MainWindowViewModel>();
-        services.AddTransient<MainWindow>();        
+        services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<BrowserAutomation>();
+        services.AddTransient<MainWindow>();
     }
 
     private void Icon_DoubleClick(object? sender, EventArgs e)

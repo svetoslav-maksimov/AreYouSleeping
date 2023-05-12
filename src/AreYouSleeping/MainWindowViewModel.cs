@@ -5,13 +5,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Microsoft.Extensions.Options;
-using System.Windows.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
+using System.Windows.Threading;
+using System.Windows;
+using System.Diagnostics;
 
 namespace AreYouSleeping;
 
@@ -48,6 +50,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _customBrowserNewPattern = "";
 
+    [ObservableProperty]
+    private TimeSpan _elapsedTime;
+
     public RelayCommand StartTimerCommand { get; init; }
     public RelayCommand StopTimerCommand { get; init; }
     public RelayCommand<string> DeleteCustomBrowserPatternCommand { get; init; }
@@ -55,12 +60,19 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly AppSettings _appSettings;
     private readonly DebounceDispatcher _debounceTimer = new DebounceDispatcher();
 
+    private readonly DispatcherTimer _sleepTimer = new DispatcherTimer();
+    private readonly DispatcherTimer _displayTimer = new DispatcherTimer();
+    private readonly Stopwatch _sleepStopwatch = new Stopwatch();
+
+    private DateTime _timeOfStart = DateTime.MinValue;
+
     public MainWindowViewModel(IOptions<AppSettings> options)
     {
         _appSettings = options.Value;
 
         TimerOptions = new ObservableCollection<TimerOption>
         {
+            TimerOption.FromDuration(TimeSpan.FromSeconds(10)),
             TimerOption.FromDuration(TimeSpan.FromMinutes(1)),
             TimerOption.FromDuration(TimeSpan.FromMinutes(10)),
             TimerOption.FromDuration(TimeSpan.FromMinutes(15)),
@@ -86,6 +98,10 @@ public partial class MainWindowViewModel : ObservableObject
 
         _selectedActionMode = ActionModes.First(x => x.ActionMode == ActionMode.CloseBrowserTab);
         _selectedTimerOption = TimerOptions.First(t => t.Duration.TotalMinutes == 20);
+
+        _sleepTimer.Tick += SleepTimer_Tick;
+        _displayTimer.Interval = TimeSpan.FromSeconds(1);
+        _displayTimer.Tick += DisplayTimer_Tick;
 
         LoadFromSettings();
     }
@@ -168,6 +184,16 @@ public partial class MainWindowViewModel : ObservableObject
         _isTimerRunning = true;
         StartTimerCommand.NotifyCanExecuteChanged();
         StopTimerCommand.NotifyCanExecuteChanged();
+
+        ElapsedTime = TimeSpan.Zero;
+
+        _sleepTimer.Interval = SelectedTimerOption.Duration;
+        _sleepTimer.Stop();
+        _sleepTimer.Start();
+
+        _displayTimer.Start();
+
+        _sleepStopwatch.Restart();
     }
 
     private void StopTimerExecute()
@@ -175,6 +201,10 @@ public partial class MainWindowViewModel : ObservableObject
         _isTimerRunning = false;
         StartTimerCommand.NotifyCanExecuteChanged();
         StopTimerCommand.NotifyCanExecuteChanged();
+
+        _sleepTimer.Stop();
+        _displayTimer.Stop();
+        _sleepStopwatch.Stop();
     }
 
     private void DeleteCustomBrowserPattern(string? pattern)
@@ -184,7 +214,6 @@ public partial class MainWindowViewModel : ObservableObject
             CustomBrowserPatterns.Remove(pattern);
         }
     }
-
 
     partial void OnSelectedActionModeChanged(ActionModeOption value)
     {
@@ -203,6 +232,27 @@ public partial class MainWindowViewModel : ObservableObject
             CustomBrowserNewPattern = string.Empty;
         }
     }
+
+    private void DisplayTimer_Tick(object? sender, EventArgs e)
+    {
+        ElapsedTime = _sleepStopwatch.Elapsed;
+    }
+
+    private void SleepTimer_Tick(object? sender, EventArgs e)
+    {
+        ElapsedTime = _sleepStopwatch.Elapsed;
+        StopTimerExecute();
+
+        string messageBoxText = "Timer elapsed";
+        string caption = "Jgtf";
+        MessageBoxButton button = MessageBoxButton.OK;
+        MessageBoxImage icon = MessageBoxImage.Exclamation;
+        MessageBoxResult result;
+
+        result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+    }
+
+
 }
 
 public class TimerOption
