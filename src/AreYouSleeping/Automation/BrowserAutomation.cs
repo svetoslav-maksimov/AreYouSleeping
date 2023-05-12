@@ -49,6 +49,24 @@ public class BrowserAutomation
             if (allTabs.Count == 0)
             {
                 _logger.LogWarning($"Did not find any Chrome tabs in window {chromeWindow.Current.Name} (pid: {chromeWindow.Current.ProcessId}).");
+
+                // maybe it's fullscreen?
+                if (tabNameRegexes.Any(regex => regex.IsMatch(chromeWindow.Current.Name)))
+                {
+                    var windowPattern = chromeWindow.GetCurrentPattern(WindowPattern.Pattern) as WindowPattern;
+                    if (windowPattern == null)
+                    {
+                        _logger.LogWarning($"Unable to close window {chromeWindow.Current.Name}.");
+                        continue;
+                    }
+                    else
+                    {
+                        windowPattern.Close();
+                        _logger.LogInformation($"Closed window {chromeWindow.Current.Name}");
+                        countClosed++;
+                    }
+                }
+
                 continue;
             }
 
