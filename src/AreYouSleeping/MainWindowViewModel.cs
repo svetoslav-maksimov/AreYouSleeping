@@ -14,6 +14,9 @@ using System.Text.Unicode;
 using System.Windows.Threading;
 using System.Windows;
 using System.Diagnostics;
+using AreYouSleeping.Automation;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace AreYouSleeping;
 
@@ -54,6 +57,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private TimeSpan _elapsedTime;
 
+    [ObservableProperty]
+    private string _timeOfSleep;
+
     public RelayCommand StartTimerCommand { get; init; }
     public RelayCommand StopTimerCommand { get; init; }
     public RelayCommand<string> DeleteCustomBrowserPatternCommand { get; init; }
@@ -67,9 +73,14 @@ public partial class MainWindowViewModel : ObservableObject
 
     private DateTime _timeOfStart = DateTime.MinValue;
 
-    public MainWindowViewModel(IOptions<AppSettings> options)
-    {        
+    private readonly ShutdownAutomation _shutdownAutomation;
+    private readonly BrowserAutomation _browserAutomation;
+
+    public MainWindowViewModel(IOptions<AppSettings> options, ShutdownAutomation shutdownAutomation, BrowserAutomation browserAutomation)
+    {
         _appSettings = options.Value;
+        _shutdownAutomation = shutdownAutomation;
+        _browserAutomation = browserAutomation;
 
         TimerOptions = new ObservableCollection<TimerOption>
         {
@@ -100,6 +111,7 @@ public partial class MainWindowViewModel : ObservableObject
         _selectedActionMode = ActionModes.First(x => x.ActionMode == ActionMode.CloseBrowserTab);
         _selectedTimerOption = TimerOptions.First(t => t.Duration.TotalMinutes == 20);
 
+        _timeOfSleep = "";
         _sleepTimer.Tick += SleepTimer_Tick;
         _displayTimer.Interval = TimeSpan.FromSeconds(1);
         _displayTimer.Tick += DisplayTimer_Tick;
@@ -167,6 +179,7 @@ public partial class MainWindowViewModel : ObservableObject
             nameof(SelectedTimerOption),
             nameof(BrowserOptionsNetflix),
             nameof(BrowserOptionsPrime),
+            nameof(BrowserOptionsHbo),
             nameof(BrowserOptionsCustom),
             nameof(CustomBrowserPatterns),
         };
@@ -187,6 +200,8 @@ public partial class MainWindowViewModel : ObservableObject
         StopTimerCommand.NotifyCanExecuteChanged();
 
         ElapsedTime = TimeSpan.Zero;
+
+        TimeOfSleep = "";
 
         _sleepTimer.Interval = SelectedTimerOption.Duration;
         _sleepTimer.Stop();
@@ -239,21 +254,43 @@ public partial class MainWindowViewModel : ObservableObject
         ElapsedTime = _sleepStopwatch.Elapsed;
     }
 
-    private void SleepTimer_Tick(object? sender, EventArgs e)
+    private async void SleepTimer_Tick(object? sender, EventArgs e)
     {
         ElapsedTime = _sleepStopwatch.Elapsed;
+        TimeOfSleep = DateTime.Now.ToShortTimeString();
         StopTimerExecute();
 
-        string messageBoxText = "Timer elapsed";
-        string caption = "Jgtf";
-        MessageBoxButton button = MessageBoxButton.OK;
-        MessageBoxImage icon = MessageBoxImage.Exclamation;
-        MessageBoxResult result;
+        switch (SelectedActionMode.ActionMode)
+        {
+            case ActionMode.CloseBrowserTab:
+                var patterns = new List<string>();
+                if (BrowserOptionsNetflix) patterns.Add("Netflix.*");
+                if (BrowserOptionsHbo) patterns.Add("HBO Max.*");
+                if (BrowserOptionsPrime) patterns.Add("Prime Video.*");
+                if (BrowserOptionsCustom) patterns.AddRange(CustomBrowserPatterns);
 
-        result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                await Task.Run(() =>
+                {
+                    _browserAutomation.CloseChromeTabs(patterns.ToArray());
+                });
+                break;
+
+            case ActionMode.CloseBrowserProcess:
+                _browserAutomation.CloseBrowserProcesses(new[] { "chrome" });
+                break;
+
+            case ActionMode.PutInSleep:
+                _shutdownAutomation.Sleep();
+                break;
+
+            case ActionMode.Shutdown:
+                _shutdownAutomation.Shutdown();
+                break;
+
+            default:
+                break;
+        }
     }
-
-
 }
 
 public class TimerOption

@@ -1,32 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Automation;
 
-namespace AreYouSleeping;
+namespace AreYouSleeping.Automation;
 
 public class BrowserAutomation
 {
-    private ILogger<BrowserAutomation> _logger;
+    private ILogger<ShutdownAutomation> _logger;
 
-    public BrowserAutomation(ILogger<BrowserAutomation> logger)
+    public BrowserAutomation(ILogger<ShutdownAutomation> logger)
     {
         _logger = logger;
     }
 
-    public bool CloseChromeTab()
-    {
-        var result = CloseChromeTabs(new[]
-        {
-            "Netflix.*",
-            "HBO Max.*"
-        });
-
-        return result;
-    }
-
-    private bool CloseChromeTabs(string[] tabNamePatterns)
+    public bool CloseChromeTabs(string[] tabNamePatterns)
     {
         var tabNameRegexes = tabNamePatterns.Select(s =>
             new Regex(s, RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(50)));
@@ -97,5 +87,29 @@ public class BrowserAutomation
         }
 
         return countClosed > 0;
+    }
+
+    public bool CloseBrowserProcesses(string[] processNames)
+    {
+        var allProcesses = processNames.SelectMany(p => Process.GetProcessesByName(p)).ToArray();
+        _logger.LogDebug($"Got {allProcesses.Length} processes to kill");
+
+        var allOk = true;
+
+        foreach (var process in allProcesses)
+        {
+            try
+            {
+                process.Kill();
+                _logger.LogInformation($"Killed process {process.Id}");
+            }
+            catch (Exception exc)
+            {
+                allOk = false;
+                _logger.LogError(exc, "Could not kill process {pid}", process.Id);
+            }
+        }
+
+        return allOk;
     }
 }

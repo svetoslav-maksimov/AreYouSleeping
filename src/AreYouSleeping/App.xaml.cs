@@ -6,6 +6,7 @@ using System.IO;
 using System.Windows;
 using NLog;
 using NLog.Extensions.Logging;
+using AreYouSleeping.Automation;
 
 namespace AreYouSleeping;
 /// <summary>
@@ -69,6 +70,7 @@ public partial class App : Application
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<BrowserAutomation>();
+        services.AddSingleton<ShutdownAutomation>();
         services.AddTransient<MainWindow>();
     }
 

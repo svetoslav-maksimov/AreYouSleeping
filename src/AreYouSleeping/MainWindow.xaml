@@ -47,7 +47,8 @@
 
             </Grid>
 
-            <TextBlock Text="{Binding ElapsedTime,StringFormat=hh\\:mm\\:ss}" HorizontalAlignment="Center" Margin="0 16" FontSize="32"/>
+            <TextBlock Text="{Binding ElapsedTime,StringFormat=hh\\:mm\\:ss, FallbackValue=00:00:00}" HorizontalAlignment="Center" Margin="0 16 0 4" FontSize="32"/>
+            <TextBlock Text="{Binding TimeOfSleep, FallbackValue=01:25:12}" HorizontalAlignment="Center" Margin="0 0" FontSize="16"/>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
