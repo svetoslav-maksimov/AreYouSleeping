@@ -19,12 +19,13 @@ namespace AreYouSleeping;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    private bool _isTimerRunning = false;
-
     public ObservableCollection<TimerOption> TimerOptions { get; set; }
     public ObservableCollection<ActionModeOption> ActionModes { get; set; }
 
     public ObservableCollection<string> CustomBrowserPatterns { get; set; }
+
+    [ObservableProperty]
+    private bool _isTimerRunning = false;
 
     [ObservableProperty]
     private TimerOption _selectedTimerOption;
@@ -67,7 +68,7 @@ public partial class MainWindowViewModel : ObservableObject
     private DateTime _timeOfStart = DateTime.MinValue;
 
     public MainWindowViewModel(IOptions<AppSettings> options)
-    {
+    {        
         _appSettings = options.Value;
 
         TimerOptions = new ObservableCollection<TimerOption>
@@ -92,8 +93,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         CustomBrowserPatterns = new ObservableCollection<string>();
 
-        StartTimerCommand = new RelayCommand(StartTimerExecute, () => { return !_isTimerRunning; });
-        StopTimerCommand = new RelayCommand(StopTimerExecute, () => { return _isTimerRunning; });
+        StartTimerCommand = new RelayCommand(StartTimerExecute, () => { return !IsTimerRunning; });
+        StopTimerCommand = new RelayCommand(StopTimerExecute, () => { return IsTimerRunning; });
         DeleteCustomBrowserPatternCommand = new RelayCommand<string>(DeleteCustomBrowserPattern);
 
         _selectedActionMode = ActionModes.First(x => x.ActionMode == ActionMode.CloseBrowserTab);
@@ -181,7 +182,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void StartTimerExecute()
     {
-        _isTimerRunning = true;
+        IsTimerRunning = true;
         StartTimerCommand.NotifyCanExecuteChanged();
         StopTimerCommand.NotifyCanExecuteChanged();
 
@@ -198,7 +199,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void StopTimerExecute()
     {
-        _isTimerRunning = false;
+        IsTimerRunning = false;
         StartTimerCommand.NotifyCanExecuteChanged();
         StopTimerCommand.NotifyCanExecuteChanged();
 
