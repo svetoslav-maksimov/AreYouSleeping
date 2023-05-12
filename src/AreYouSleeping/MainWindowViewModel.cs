@@ -12,7 +12,6 @@ using System.Text.Json.Nodes;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Windows.Threading;
-using System.Windows;
 using System.Diagnostics;
 using AreYouSleeping.Automation;
 using System.Collections.Generic;
@@ -71,16 +70,18 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly DispatcherTimer _displayTimer = new DispatcherTimer();
     private readonly Stopwatch _sleepStopwatch = new Stopwatch();
 
-    private DateTime _timeOfStart = DateTime.MinValue;
+    private readonly AwakePromptFactory _awakePromptFactory;
 
     private readonly ShutdownAutomation _shutdownAutomation;
     private readonly BrowserAutomation _browserAutomation;
 
-    public MainWindowViewModel(IOptions<AppSettings> options, ShutdownAutomation shutdownAutomation, BrowserAutomation browserAutomation)
+    public MainWindowViewModel(IOptions<AppSettings> options, AwakePromptFactory awakePromptFactory,
+        ShutdownAutomation shutdownAutomation, BrowserAutomation browserAutomation)
     {
         _appSettings = options.Value;
         _shutdownAutomation = shutdownAutomation;
         _browserAutomation = browserAutomation;
+        _awakePromptFactory = awakePromptFactory;
 
         TimerOptions = new ObservableCollection<TimerOption>
         {
@@ -260,35 +261,45 @@ public partial class MainWindowViewModel : ObservableObject
         TimeOfSleep = DateTime.Now.ToShortTimeString();
         StopTimerExecute();
 
-        switch (SelectedActionMode.ActionMode)
+        var promptResult = await _awakePromptFactory.AskForConfirmation();
+        if (promptResult == true)
         {
-            case ActionMode.CloseBrowserTab:
-                var patterns = new List<string>();
-                if (BrowserOptionsNetflix) patterns.Add("Netflix.*");
-                if (BrowserOptionsHbo) patterns.Add("HBO Max.*");
-                if (BrowserOptionsPrime) patterns.Add("Prime Video.*");
-                if (BrowserOptionsCustom) patterns.AddRange(CustomBrowserPatterns);
+            // yes, sleeping
+            switch (SelectedActionMode.ActionMode)
+            {
+                case ActionMode.CloseBrowserTab:
+                    var patterns = new List<string>();
+                    if (BrowserOptionsNetflix) patterns.Add("Netflix.*");
+                    if (BrowserOptionsHbo) patterns.Add("HBO Max.*");
+                    if (BrowserOptionsPrime) patterns.Add("Prime Video.*");
+                    if (BrowserOptionsCustom) patterns.AddRange(CustomBrowserPatterns);
 
-                await Task.Run(() =>
-                {
-                    _browserAutomation.CloseChromeTabs(patterns.ToArray());
-                });
-                break;
+                    await Task.Run(() =>
+                    {
+                        _browserAutomation.CloseChromeTabs(patterns.ToArray());
+                    });
+                    break;
 
-            case ActionMode.CloseBrowserProcess:
-                _browserAutomation.CloseBrowserProcesses(new[] { "chrome" });
-                break;
+                case ActionMode.CloseBrowserProcess:
+                    _browserAutomation.CloseBrowserProcesses(new[] { "chrome" });
+                    break;
 
-            case ActionMode.PutInSleep:
-                _shutdownAutomation.Sleep();
-                break;
+                case ActionMode.PutInSleep:
+                    _shutdownAutomation.Sleep();
+                    break;
 
-            case ActionMode.Shutdown:
-                _shutdownAutomation.Shutdown();
-                break;
+                case ActionMode.Shutdown:
+                    _shutdownAutomation.Shutdown();
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            // no, restart the timer
+            StartTimerExecute();
         }
     }
 }

@@ -71,6 +71,7 @@ public partial class App : Application
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<BrowserAutomation>();
         services.AddSingleton<ShutdownAutomation>();
+        services.AddSingleton<AwakePromptFactory>();
         services.AddTransient<MainWindow>();
     }
 
