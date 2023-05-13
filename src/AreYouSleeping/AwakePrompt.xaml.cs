@@ -46,9 +46,7 @@ namespace AreYouSleeping
 
         private void AwakePrompt_Loaded(object sender, RoutedEventArgs e)
         {
-            _viewModel.Prompt = _appSettings.SleepPrompt;
-
-            _viewModel.Remaining = $"{TotalDuration.Seconds} seconds";
+            _viewModel.Remaining = $"{TotalDuration.Seconds}";
 
             _promptTimer.Stop();
             _promptTimer.Start();
@@ -66,7 +64,7 @@ namespace AreYouSleeping
                 Close();
             }
 
-            _viewModel.Remaining = $"{(TotalDuration - _promptStopwatch.Elapsed).Seconds} seconds";
+            _viewModel.Remaining = $"{(TotalDuration - _promptStopwatch.Elapsed).Seconds}";
         }
 
         private void Yes_Click(object sender, RoutedEventArgs e)
@@ -110,9 +108,6 @@ namespace AreYouSleeping
 
     public partial class AwakePromptViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private string _prompt = "Are you sleeping?";
-
         [ObservableProperty]
         private string _remaining = "30s";
     }

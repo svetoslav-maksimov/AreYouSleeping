@@ -3,122 +3,142 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AreYouSleeping"
+        xmlns:converters="clr-namespace:AreYouSleeping.Converters"
         mc:Ignorable="d"
-        Title="Are You Sleeping" Height="400" Width="600" >
+        Title="{DynamicResource Window_Title}" Height="340" Width="600" 
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:ActionModeToLabelConverter x:Key="ActionModeToLabelConverter" />
+        <converters:TimeSpanToLabelConverter x:Key="TimeSpanToLabelConverter" />
     </Window.Resources>
-    <Grid Margin="25">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="2*"/>
-        </Grid.ColumnDefinitions>
+    <Grid Margin="25 6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
 
-        <StackPanel>
-            <Grid Margin="15 25">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Sleep Timer" VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="1" Margin="12 4" x:Name="sleepTimeCombo" ItemsSource="{Binding TimerOptions}"
+        <ComboBox HorizontalAlignment="Right" Margin="14 0" MinWidth="150"
+                  ItemsSource="{Binding AvailableLanguages}"
+                  SelectedItem="{Binding SelectedCulture, Mode=TwoWay}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding NativeName}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <Grid Margin="15 25">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{DynamicResource Main_SleepTimer}" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" Margin="12 4" x:Name="sleepTimeCombo" ItemsSource="{Binding TimerOptions}"
                           SelectedItem="{Binding SelectedTimerOption, Mode=TwoWay}" 
                           IsEnabled="{Binding IsTimerRunning, Converter={StaticResource InverseBooleanConverter}}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Label}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </Grid>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                </Grid.ColumnDefinitions>
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource TimeSpanToLabelConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Button x:Name="StartTimer" Content="Start" Command="{Binding StartTimerCommand}" 
+                    <Button x:Name="StartTimer" Content="{DynamicResource Main_Start}" Command="{Binding StartTimerCommand}" 
                         Margin="8" Height="48"/>
 
-                <Button Grid.Column="1" x:Name="Stop" Content="Stop" Command="{Binding StopTimerCommand}"
+                    <Button Grid.Column="1" x:Name="Stop" Content="{DynamicResource Main_Stop}" Command="{Binding StopTimerCommand}"
                         Margin="8" Height="48"/>
 
-            </Grid>
+                </Grid>
 
-            <TextBlock Text="{Binding ElapsedTime,StringFormat=hh\\:mm\\:ss, FallbackValue=00:00:00}" HorizontalAlignment="Center" Margin="0 16 0 4" FontSize="32"/>
-            <TextBlock Text="{Binding TimeOfSleep, FallbackValue=01:25:12}" HorizontalAlignment="Center" Margin="0 0" FontSize="16"/>
-        </StackPanel>
+                <TextBlock Text="{Binding ElapsedTime,StringFormat=hh\\:mm\\:ss, FallbackValue=00:00:00}" HorizontalAlignment="Center" Margin="0 16 0 4" FontSize="32"/>
+                <TextBlock Text="{Binding TimeOfSleep, FallbackValue=01:25:12}" HorizontalAlignment="Center" Margin="0 0" FontSize="16"/>
+            </StackPanel>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
-        </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            </StackPanel>
 
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid Margin="15 25 15 2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Mode" VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="1" Margin="12 4" ItemsSource="{Binding ActionModes}"
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Margin="15 25 15 2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{DynamicResource Main_Mode}" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" Margin="12 4 0 4" ItemsSource="{Binding ActionModes}"
                           SelectedItem="{Binding SelectedActionMode, Mode=TwoWay}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Label}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </Grid>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource ActionModeToLabelConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
 
-                <StackPanel Visibility="{Binding BrowserOptionsVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    <StackPanel Visibility="{Binding BrowserOptionsVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"
                         Margin="12 0">
-                    <TextBlock Text="NOTE: Close browser tab mode currently only supports the Chrome browser" 
+                        <TextBlock Text="{DynamicResource Main_BrowserTabNote}" 
                            TextWrapping="Wrap" Margin="0 6" Foreground="#FFBD440A"/>
 
-                    <CheckBox Content="Netflix" IsChecked="{Binding BrowserOptionsNetflix, Mode=TwoWay}" />
-                    <CheckBox Content="HBO Max" IsChecked="{Binding BrowserOptionsHbo, Mode=TwoWay}" />
-                    <CheckBox Content="Prime Video" IsChecked="{Binding BrowserOptionsPrime, Mode=TwoWay}" />
-                    <CheckBox Content="Custom" IsChecked="{Binding BrowserOptionsCustom, Mode=TwoWay}" />
+                        <CheckBox Content="Netflix" IsChecked="{Binding BrowserOptionsNetflix, Mode=TwoWay}" />
+                        <CheckBox Content="HBO Max" IsChecked="{Binding BrowserOptionsHbo, Mode=TwoWay}" />
+                        <CheckBox Content="Prime Video" IsChecked="{Binding BrowserOptionsPrime, Mode=TwoWay}" />
+                        <CheckBox Content="{DynamicResource Main_Custom}" IsChecked="{Binding BrowserOptionsCustom, Mode=TwoWay}" />
 
-                    <StackPanel Visibility="{Binding BrowserOptionsCustom, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ItemsControl ItemsSource="{Binding CustomBrowserPatterns}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Text="{Binding ., Mode=TwoWay}" Margin="22 2 2 2"/>
-                                        <Button Width="24" Content="x" Grid.Column="1" Margin="2" 
+                        <StackPanel Visibility="{Binding BrowserOptionsCustom, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ItemsControl ItemsSource="{Binding CustomBrowserPatterns}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Text="{Binding ., Mode=TwoWay}" Margin="22 2 2 2"/>
+                                            <Button Width="24" Content="x" Grid.Column="1" Margin="2" 
                                             Command="{Binding DataContext.DeleteCustomBrowserPatternCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
                                             CommandParameter="{Binding .}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
-                        <Grid Margin="0 6 0 0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBox Text="{Binding CustomBrowserNewPattern, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="22 2 2 2"/>
-                            <Button Width="24" Content="+" Grid.Column="1" Margin="2" />
-                        </Grid>
+                            <Grid Margin="0 6 0 0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding CustomBrowserNewPattern, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="22 2 2 2"/>
+                                <Button Width="24" Content="+" Grid.Column="1" Margin="2" />
+                            </Grid>
+                        </StackPanel>
+
                     </StackPanel>
+                </ScrollViewer>
 
-                </StackPanel>
-            </ScrollViewer>
-            
+            </Grid>
+
         </Grid>
-
     </Grid>
 </Window>

@@ -3,9 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AreYouSleeping"
         mc:Ignorable="d"
-        Title="Are you sleeping" Height="200" Width="360"
+        Title="{DynamicResource Window_Title}" Height="200" Width="360"
         Topmost="True"         
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
@@ -18,16 +17,19 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{Binding Prompt, FallbackValue=Are you sleeping?}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"/>
-        <TextBlock Grid.Row="1" Text="{Binding Remaining, FallbackValue=30s?}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"/>
+        <TextBlock Text="{DynamicResource AwakePrompt_PromptText}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"/>
+        <TextBlock Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20">
+           <Run Text="{Binding Remaining, FallbackValue=30}" />
+           <Run Text="{DynamicResource AwakePrompt_Seconds}" />
+        </TextBlock>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button Content="Yes" Margin="32 16" Click="Yes_Click"/>
-            <Button Grid.Column="2" Margin="6" Content="No, restart sleep timer" Click="No_Click"/>
+            <Button Content="{DynamicResource AwakePrompt_Yes}" Margin="32 16" Click="Yes_Click"/>
+            <Button Grid.Column="2" Margin="6" Content="{DynamicResource AwakePrompt_No}" Click="No_Click"/>
         </Grid>
 
         <Image Grid.RowSpan="2" Width="64" Height="64" HorizontalAlignment="Left" Margin="12"

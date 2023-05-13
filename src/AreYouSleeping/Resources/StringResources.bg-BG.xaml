@@ -1,0 +1,21 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
+    <system:String x:Key="Main_SleepTimer">Таймер за сън</system:String>
+    <system:String x:Key="Main_Start">Старт</system:String>
+    <system:String x:Key="Main_Stop">Стоп</system:String>
+    <system:String x:Key="Main_Mode">Режим</system:String>
+    <system:String x:Key="Main_BrowserTabNote">Забележка: Режим Затваряне на Браузър Таб в момента поддържа само Chrome</system:String>
+    <system:String x:Key="Main_ActionMode_CloseBrowserTab">Затваряне на Браузър Таб</system:String>
+    <system:String x:Key="Main_ActionMode_CloseBrowserProcess">Затваряне на всички браузъри</system:String>
+    <system:String x:Key="Main_ActionMode_PutInSleep">Заспиване на компютъра</system:String>
+    <system:String x:Key="Main_ActionMode_Shutdown">Изгасяне на компютъра</system:String>
+    <system:String x:Key="Main_Duration_Minutes">минути</system:String>
+    <system:String x:Key="Main_Duration_Hours">часа</system:String>
+    <system:String x:Key="Main_Custom">Друго</system:String>
+    <system:String x:Key="AwakePrompt_PromptText">Спиш ли?</system:String>
+    <system:String x:Key="AwakePrompt_Yes">Спя</system:String>
+    <system:String x:Key="AwakePrompt_No">Не, рестартирай таймера</system:String>
+    <system:String x:Key="AwakePrompt_Seconds">секунди</system:String>
+    <system:String x:Key="Window_Title">Спиш ли</system:String>
+</ResourceDictionary>

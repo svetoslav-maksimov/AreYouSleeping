@@ -6,10 +6,11 @@ namespace AreYouSleeping;
 
 public class AppSettings
 {
-    public string SleepPrompt { get; set; } = "";
+    public string Language { get; set; } = "en-US";
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ActionMode SelectedActionMode { get; set; } = ActionMode.CloseBrowserTab;
+
     public TimeSpan TimerDuration { get; set; } = TimeSpan.FromMinutes(20);
 
     public AppSettingsBrowserTabOptions BrowserTabOptions { get; set; } = new AppSettingsBrowserTabOptions();

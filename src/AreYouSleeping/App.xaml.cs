@@ -20,6 +20,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        SetupLocalization();
+
         // system tray setup
         var icon = new System.Windows.Forms.NotifyIcon
         {
@@ -49,6 +51,25 @@ public partial class App : Application
 
         var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();
+    }
+
+    public void SetupLocalization(string culture = "en-US")
+    {
+        var languageDictionary = new ResourceDictionary();
+        switch (culture)
+        {
+            case "bg-BG":
+                languageDictionary.Source = new Uri("/Resources/StringResources.bg-BG.xaml", UriKind.Relative);
+                break;
+
+            case "en-US":
+            default:
+                languageDictionary.Source = new Uri("/Resources/StringResources.xaml", UriKind.Relative);
+                break;
+        }
+
+        Resources.MergedDictionaries.Clear();
+        Resources.MergedDictionaries.Add(languageDictionary);
     }
 
     protected override void OnExit(ExitEventArgs e)

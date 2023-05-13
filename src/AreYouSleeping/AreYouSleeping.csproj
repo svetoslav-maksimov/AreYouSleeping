@@ -14,6 +14,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Page Remove="Resources\StringResources.bg-BG.xaml" />
+	  <Page Remove="Resources\StringResources.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="ProjectResources.Designer.cs">
 	    <DesignTime>True</DesignTime>
 	    <AutoGen>True</AutoGen>
@@ -40,6 +45,12 @@
 
 	<ItemGroup>
 	  <Resource Include="Resources\sleep_image.png" />
+	  <Resource Include="Resources\StringResources.bg-BG.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Resource>
+	  <Resource Include="Resources\StringResources.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Resource>
 	</ItemGroup>
 
 	<ItemGroup>
