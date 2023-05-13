@@ -22,7 +22,7 @@ If you often fall asleep while watching movies or series, this is for you. Simil
 The app works only on Windows
 
 ### Installation steps
-1. Download the zip archive of the latest release from the [Releases page](https://github.com/svetoslav-maksimov/AreYouSleeping/releases)
+1. Download the zip archive of the latest release from the [Releases page](https://github.com/svetoslav-maksimov/AreYouSleeping/releases) named ```are-you-sleeping-<version>.zip```
 2. Unzip somewhere on your computer where you can easily find it   
 3. That's it! You can start the app by running ```AreYouSleeping.exe```
 
