@@ -4,6 +4,8 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace AreYouSleeping
@@ -33,6 +35,13 @@ namespace AreYouSleeping
             _promptTimer.Tick += PromptTimer_Tick;
 
             Loaded += AwakePrompt_Loaded;
+
+            var imageSource = Imaging.CreateBitmapSourceFromHIcon(
+                ProjectResources.SysTrayIcon.Handle,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
+            Icon = imageSource;
+
         }
 
         private void AwakePrompt_Loaded(object sender, RoutedEventArgs e)
@@ -52,7 +61,7 @@ namespace AreYouSleeping
             {
                 _promptTimer.Stop();
                 _promptStopwatch.Stop();
-           
+
                 PromptResult = true;
                 Close();
             }

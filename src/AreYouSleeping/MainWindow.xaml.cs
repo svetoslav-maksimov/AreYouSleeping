@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 
 namespace AreYouSleeping;
 
@@ -16,6 +19,12 @@ public partial class MainWindow : Window
         DataContext = mainWindowViewModel;
 
         InitializeComponent();
+
+        var imageSource = Imaging.CreateBitmapSourceFromHIcon(
+           ProjectResources.SysTrayIcon.Handle,
+           Int32Rect.Empty,
+           BitmapSizeOptions.FromEmptyOptions());
+        Icon = imageSource;
     }
 
     protected override void OnClosed(EventArgs e)

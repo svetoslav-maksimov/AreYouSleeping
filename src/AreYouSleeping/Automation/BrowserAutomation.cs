@@ -48,7 +48,7 @@ public class BrowserAutomation
 
             if (allTabs.Count == 0)
             {
-                _logger.LogWarning($"Did not find any Chrome tabs in window {chromeWindow.Current.Name} (pid: {chromeWindow.Current.ProcessId}).");
+                _logger.LogDebug($"Did not find any Chrome tabs in window {chromeWindow.Current.Name} (pid: {chromeWindow.Current.ProcessId}), maybe it's full screen.");
 
                 // maybe it's fullscreen?
                 if (tabNameRegexes.Any(regex => regex.IsMatch(chromeWindow.Current.Name)))
@@ -103,6 +103,8 @@ public class BrowserAutomation
                 }
             }
         }
+
+        _logger.LogInformation($"Closed {countClosed} tabs in total");
 
         return countClosed > 0;
     }

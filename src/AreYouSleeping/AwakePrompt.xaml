@@ -5,9 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AreYouSleeping"
         mc:Ignorable="d"
-        Title="Are you sleeping" Height="200" Width="300"
-        Topmost="True" 
+        Title="Are you sleeping" Height="200" Width="360"
+        Topmost="True"         
         WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <BitmapImage x:Key="SleepyImage" UriSource="/Resources/sleep_image.png" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -23,9 +26,12 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button Content="Yes" Margin="6" Click="Yes_Click"/>
+            <Button Content="Yes" Margin="32 16" Click="Yes_Click"/>
             <Button Grid.Column="2" Margin="6" Content="No, restart sleep timer" Click="No_Click"/>
         </Grid>
+
+        <Image Grid.RowSpan="2" Width="64" Height="64" HorizontalAlignment="Left" Margin="12"
+               Source="{StaticResource SleepyImage}"/>
 
     </Grid>
 </Window>
