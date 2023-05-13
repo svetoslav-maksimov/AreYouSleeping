@@ -124,8 +124,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         TimerOptions = new ObservableCollection<TimeSpan>
         {
-            TimeSpan.FromSeconds(10),
-            TimeSpan.FromMinutes(1),
+            TimeSpan.FromMinutes(2),
             TimeSpan.FromMinutes(10),
             TimeSpan.FromMinutes(15),
             TimeSpan.FromMinutes(20),
@@ -325,7 +324,12 @@ public partial class MainWindowViewModel : ObservableObject
                     break;
 
                 case ActionMode.CloseBrowserProcess:
-                    _browserAutomation.CloseBrowserProcesses(new[] { "chrome" });
+                    _browserAutomation.CloseBrowserProcesses(new[]
+                    {
+                        "chrome",
+                        "msedge",
+                        "firefox"
+                    });
                     break;
 
                 case ActionMode.PutInSleep:

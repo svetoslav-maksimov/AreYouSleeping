@@ -7,6 +7,7 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
 		<Version>0.1.0</Version>
+		<ApplicationIcon>Resources\tray_icon.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,6 +18,10 @@
 	<ItemGroup>
 	  <Page Remove="Resources\StringResources.bg-BG.xaml" />
 	  <Page Remove="Resources\StringResources.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Resources\tray_icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
