@@ -80,7 +80,7 @@ public partial class App : Application
 
     private void ConfigureServices(IServiceCollection services)
     {
-        services.Configure<AppSettings>(Configuration?.GetSection(nameof(AppSettings)));
+        services.Configure<AppSettings>(Configuration!.GetSection(nameof(AppSettings))!);
         services.AddLogging(loggingBuilder =>
         {
             // configure Logging with NLog

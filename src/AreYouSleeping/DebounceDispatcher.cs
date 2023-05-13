@@ -37,9 +37,9 @@ public class DebounceDispatcher
     /// <param name="priority">optional priorty for the dispatcher</param>
     /// <param name="disp">optional dispatcher. If not passed or null CurrentDispatcher is used.</param>        
     public void Debounce(int interval, Action<object> action,
-        object param = null,
+        object? param = null,
         DispatcherPriority priority = DispatcherPriority.ApplicationIdle,
-        Dispatcher disp = null)
+        Dispatcher? disp = null)
     {
         // kill pending timer and pending ticks
         timer?.Stop();
@@ -77,9 +77,9 @@ public class DebounceDispatcher
     /// <param name="priority">optional priorty for the dispatcher</param>
     /// <param name="disp">optional dispatcher. If not passed or null CurrentDispatcher is used.</param>
     public void Throttle(int interval, Action<object> action,
-        object param = null,
+        object? param = null,
         DispatcherPriority priority = DispatcherPriority.ApplicationIdle,
-        Dispatcher disp = null)
+        Dispatcher? disp = null)
     {
         // kill pending timer and pending ticks
         timer?.Stop();
