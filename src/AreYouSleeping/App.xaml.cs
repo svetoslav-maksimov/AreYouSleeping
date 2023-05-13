@@ -7,6 +7,7 @@ using System.Windows;
 using NLog;
 using NLog.Extensions.Logging;
 using AreYouSleeping.Automation;
+using AreYouSleeping.Updater;
 
 namespace AreYouSleeping;
 /// <summary>
@@ -80,6 +81,7 @@ public partial class App : Application
 
     private void ConfigureServices(IServiceCollection services)
     {
+        services.AddHttpClient();
         services.Configure<AppSettings>(Configuration!.GetSection(nameof(AppSettings))!);
         services.AddLogging(loggingBuilder =>
         {
@@ -93,6 +95,7 @@ public partial class App : Application
         services.AddSingleton<BrowserAutomation>();
         services.AddSingleton<ShutdownAutomation>();
         services.AddSingleton<AwakePromptFactory>();
+        services.AddSingleton<NewVersionChecker>();
         services.AddTransient<MainWindow>();
     }
 

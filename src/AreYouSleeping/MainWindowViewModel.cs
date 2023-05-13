@@ -16,6 +16,7 @@ using System.Diagnostics;
 using AreYouSleeping.Automation;
 using System.Collections.Generic;
 using System.Globalization;
+using AreYouSleeping.Updater;
 
 namespace AreYouSleeping;
 
@@ -67,9 +68,22 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private CultureInfo _selectedCulture;
 
+    [ObservableProperty]
+    private bool _isNewVersionAvailable = false;
+
+    [ObservableProperty]
+    private string _newVersionNumber = "";
+
+    [ObservableProperty]
+    private DateTime _newVersionDate = DateTime.MinValue;
+
+    [ObservableProperty]
+    private string _newVersionLink = "";
+
     public RelayCommand StartTimerCommand { get; init; }
     public RelayCommand StopTimerCommand { get; init; }
     public RelayCommand<string> DeleteCustomBrowserPatternCommand { get; init; }
+    public RelayCommand NavigateToNewVersionLink { get; set; }
 
     private readonly AppSettings _appSettings;
     private readonly DebounceDispatcher _debounceTimer = new DebounceDispatcher();
@@ -84,7 +98,8 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly BrowserAutomation _browserAutomation;
 
     public MainWindowViewModel(IOptions<AppSettings> options, AwakePromptFactory awakePromptFactory,
-        ShutdownAutomation shutdownAutomation, BrowserAutomation browserAutomation)
+        ShutdownAutomation shutdownAutomation, BrowserAutomation browserAutomation,
+        NewVersionChecker newVersionChecker)
     {
         _appSettings = options.Value;
         _shutdownAutomation = shutdownAutomation;
@@ -107,6 +122,7 @@ public partial class MainWindowViewModel : ObservableObject
         StartTimerCommand = new RelayCommand(StartTimerExecute, () => { return !IsTimerRunning; });
         StopTimerCommand = new RelayCommand(StopTimerExecute, () => { return IsTimerRunning; });
         DeleteCustomBrowserPatternCommand = new RelayCommand<string>(DeleteCustomBrowserPattern);
+        NavigateToNewVersionLink = new RelayCommand(NavigateToNewVersionLinkExecute);
 
         _selectedActionMode = ActionMode.CloseBrowserTab;
         _selectedTimerOption = TimerOptions.First(t => t.TotalMinutes == 20);
@@ -118,6 +134,28 @@ public partial class MainWindowViewModel : ObservableObject
         _displayTimer.Tick += DisplayTimer_Tick;
 
         LoadFromSettings();
+
+        // check for new versions
+        newVersionChecker.CheckForNewVersions().ContinueWith((newVersionResponse) =>
+        {
+            var newVersion = newVersionResponse.Result;
+            if (newVersion != null)
+            {
+                IsNewVersionAvailable = true;
+                NewVersionNumber = newVersion.Tag_name!;
+                NewVersionDate = newVersion.Published_at.HasValue ? newVersion.Published_at.Value.ToLocalTime() : DateTime.MinValue;
+                NewVersionLink = newVersion.Html_url!;
+            }
+        });
+    }
+
+    private void NavigateToNewVersionLinkExecute()
+    {
+        var sInfo = new ProcessStartInfo(NewVersionLink)
+        {
+            UseShellExecute = true,
+        };
+        Process.Start(sInfo);
     }
 
     private void SetupActionModesAndTimerOptions()
