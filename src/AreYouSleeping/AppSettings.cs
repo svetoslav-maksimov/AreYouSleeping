@@ -14,6 +14,8 @@ public class AppSettings
     public TimeSpan TimerDuration { get; set; } = TimeSpan.FromMinutes(20);
 
     public AppSettingsBrowserTabOptions BrowserTabOptions { get; set; } = new AppSettingsBrowserTabOptions();
+
+    public bool IsShowingElapsedTime { get; set; } = false;
 }
 
 public class AppSettingsBrowserTabOptions

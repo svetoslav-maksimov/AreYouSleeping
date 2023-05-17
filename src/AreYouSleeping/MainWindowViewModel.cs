@@ -63,6 +63,12 @@ public partial class MainWindowViewModel : ObservableObject
     private TimeSpan _elapsedTime;
 
     [ObservableProperty]
+    private TimeSpan _remainingTime;
+
+    [ObservableProperty]
+    private bool _isShowingElapsedTime = false;
+
+    [ObservableProperty]
     private string _timeOfSleep;
 
     [ObservableProperty]
@@ -84,18 +90,21 @@ public partial class MainWindowViewModel : ObservableObject
     public RelayCommand StopTimerCommand { get; init; }
     public RelayCommand<string> DeleteCustomBrowserPatternCommand { get; init; }
     public RelayCommand NavigateToNewVersionLink { get; set; }
+    public RelayCommand SwitchTimerViewCommand { get; set; }
 
     private readonly AppSettings _appSettings;
     private readonly DebounceDispatcher _debounceTimer = new DebounceDispatcher();
 
     private readonly DispatcherTimer _sleepTimer = new DispatcherTimer();
     private readonly DispatcherTimer _displayTimer = new DispatcherTimer();
+    private readonly DispatcherTimer _newVersionCheckerTimer = new DispatcherTimer();
     private readonly Stopwatch _sleepStopwatch = new Stopwatch();
 
     private readonly AwakePromptFactory _awakePromptFactory;
 
     private readonly ShutdownAutomation _shutdownAutomation;
     private readonly BrowserAutomation _browserAutomation;
+    private readonly NewVersionChecker _newVersionChecker;
 
     public MainWindowViewModel(IOptions<AppSettings> options, AwakePromptFactory awakePromptFactory,
         ShutdownAutomation shutdownAutomation, BrowserAutomation browserAutomation,
@@ -105,6 +114,7 @@ public partial class MainWindowViewModel : ObservableObject
         _shutdownAutomation = shutdownAutomation;
         _browserAutomation = browserAutomation;
         _awakePromptFactory = awakePromptFactory;
+        _newVersionChecker = newVersionChecker;
 
         TimerOptions = new ObservableCollection<TimeSpan>();
         ActionModes = new ObservableCollection<ActionMode>();
@@ -123,6 +133,7 @@ public partial class MainWindowViewModel : ObservableObject
         StopTimerCommand = new RelayCommand(StopTimerExecute, () => { return IsTimerRunning; });
         DeleteCustomBrowserPatternCommand = new RelayCommand<string>(DeleteCustomBrowserPattern);
         NavigateToNewVersionLink = new RelayCommand(NavigateToNewVersionLinkExecute);
+        SwitchTimerViewCommand = new RelayCommand(SwitchTimerExecute);
 
         _selectedActionMode = ActionMode.CloseBrowserTab;
         _selectedTimerOption = TimerOptions.First(t => t.TotalMinutes == 20);
@@ -135,8 +146,22 @@ public partial class MainWindowViewModel : ObservableObject
 
         LoadFromSettings();
 
-        // check for new versions
-        newVersionChecker.CheckForNewVersions().ContinueWith((newVersionResponse) =>
+        // check for new versions every hour
+        _newVersionCheckerTimer.Interval = TimeSpan.FromHours(1);
+        _newVersionCheckerTimer.Tick += _newVersionCheckerTimer_Tick;
+        _newVersionCheckerTimer.Start();
+
+        CheckForNewVersions();
+    }
+
+    private void _newVersionCheckerTimer_Tick(object? sender, EventArgs e)
+    {
+        CheckForNewVersions();
+    }
+
+    private void CheckForNewVersions()
+    {
+        _newVersionChecker.CheckForNewVersions().ContinueWith((newVersionResponse) =>
         {
             var newVersion = newVersionResponse.Result;
             if (newVersion != null)
@@ -146,7 +171,16 @@ public partial class MainWindowViewModel : ObservableObject
                 NewVersionDate = newVersion.Published_at.HasValue ? newVersion.Published_at.Value.ToLocalTime() : DateTime.MinValue;
                 NewVersionLink = newVersion.Html_url!;
             }
+            else
+            {
+                IsNewVersionAvailable = false;
+            }
         });
+    }
+
+    private void SwitchTimerExecute()
+    {
+        IsShowingElapsedTime = !IsShowingElapsedTime;
     }
 
     private void NavigateToNewVersionLinkExecute()
@@ -195,6 +229,8 @@ public partial class MainWindowViewModel : ObservableObject
         SelectedCulture = AvailableLanguages.FirstOrDefault(l => l.Name == _appSettings.Language) ?? AvailableLanguages[0];
 
         CustomBrowserPatterns = new ObservableCollection<string>(_appSettings.BrowserTabOptions.CustomBrowserPatterns);
+
+        IsShowingElapsedTime = _appSettings.IsShowingElapsedTime;
     }
 
     private async Task SaveToSettings()
@@ -215,6 +251,7 @@ public partial class MainWindowViewModel : ObservableObject
         settings.BrowserTabOptions.Prime = BrowserOptionsPrime;
         settings.BrowserTabOptions.Custom = BrowserOptionsCustom;
         settings.BrowserTabOptions.CustomBrowserPatterns = CustomBrowserPatterns.ToList();
+        settings.IsShowingElapsedTime = IsShowingElapsedTime;
 
         var serializerOptions = new JsonSerializerOptions
         {
@@ -247,6 +284,7 @@ public partial class MainWindowViewModel : ObservableObject
             nameof(BrowserOptionsHbo),
             nameof(BrowserOptionsCustom),
             nameof(CustomBrowserPatterns),
+            nameof(IsShowingElapsedTime)
         };
 
         if (persistedPropertyNames.Contains(e.PropertyName))
@@ -282,6 +320,7 @@ public partial class MainWindowViewModel : ObservableObject
         StopTimerCommand.NotifyCanExecuteChanged();
 
         ElapsedTime = TimeSpan.Zero;
+        RemainingTime = SelectedTimerOption;
 
         TimeOfSleep = "";
 
@@ -334,11 +373,13 @@ public partial class MainWindowViewModel : ObservableObject
     private void DisplayTimer_Tick(object? sender, EventArgs e)
     {
         ElapsedTime = _sleepStopwatch.Elapsed;
+        RemainingTime = SelectedTimerOption - ElapsedTime;
     }
 
     private async void SleepTimer_Tick(object? sender, EventArgs e)
     {
-        ElapsedTime = _sleepStopwatch.Elapsed;
+        ElapsedTime = SelectedTimerOption;
+        RemainingTime = TimeSpan.Zero;
         TimeOfSleep = DateTime.Now.ToShortTimeString();
         StopTimerExecute();
 

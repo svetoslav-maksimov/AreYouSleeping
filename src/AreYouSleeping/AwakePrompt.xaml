@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="{DynamicResource Window_Title}" Height="200" Width="360"
+        Title="{DynamicResource Window_Title}" Height="600" Width="800"
         Topmost="True"         
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
@@ -12,25 +12,30 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{DynamicResource AwakePrompt_PromptText}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"/>
-        <TextBlock Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20">
+        <TextBlock Text="{DynamicResource AwakePrompt_PromptText}" TextWrapping="Wrap" 
+                   VerticalAlignment="Center" HorizontalAlignment="Center" 
+                   FontSize="48" Margin="24"/>
+        <TextBlock Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                   FontSize="36" Margin="12">
            <Run Text="{Binding Remaining, FallbackValue=30}" />
            <Run Text="{DynamicResource AwakePrompt_Seconds}" />
         </TextBlock>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button Content="{DynamicResource AwakePrompt_Yes}" Margin="32 16" Click="Yes_Click"/>
-            <Button Grid.Column="2" Margin="6" Content="{DynamicResource AwakePrompt_No}" Click="No_Click"/>
+            <Button Grid.Column="2" Margin="12" Content="{DynamicResource AwakePrompt_No}" Click="No_Click" FontSize="48"/>
         </Grid>
+
+        <Button Grid.Row="1" Width="64" Height="24" HorizontalAlignment="Left"
+                Content="{DynamicResource AwakePrompt_Yes}" Margin="12 16" Click="Yes_Click" />
 
         <Image Grid.RowSpan="2" Width="64" Height="64" HorizontalAlignment="Left" Margin="12"
                Source="{StaticResource SleepyImage}"/>

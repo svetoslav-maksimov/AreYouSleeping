@@ -10,6 +10,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
         <converters:ActionModeToLabelConverter x:Key="ActionModeToLabelConverter" />
         <converters:TimeSpanToLabelConverter x:Key="TimeSpanToLabelConverter" />
     </Window.Resources>
@@ -67,7 +68,17 @@
 
                 </Grid>
 
-                <TextBlock Text="{Binding ElapsedTime,StringFormat=hh\\:mm\\:ss, FallbackValue=00:00:00}" HorizontalAlignment="Center" Margin="0 16 0 4" FontSize="32"/>
+                <Button Margin="8 16 8 4" BorderThickness="0" Background="Transparent" Cursor="Hand"
+                        Command="{Binding SwitchTimerViewCommand}">
+                    <Grid >
+                        <TextBlock Text="{Binding ElapsedTime,StringFormat=hh\\:mm\\:ss, FallbackValue=00:00:00}" 
+                                   HorizontalAlignment="Center" FontSize="32"
+                                   Visibility="{Binding IsShowingElapsedTime, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBlock Text="{Binding RemainingTime,StringFormat=hh\\:mm\\:ss, FallbackValue=00:00:00}" 
+                                   HorizontalAlignment="Center" FontSize="32"
+                                   Visibility="{Binding IsShowingElapsedTime, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                    </Grid>
+                </Button>
                 <TextBlock Text="{Binding TimeOfSleep, FallbackValue=01:25:12}" HorizontalAlignment="Center" Margin="0 0" FontSize="16"/>
             </StackPanel>
 
